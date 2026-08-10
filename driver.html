@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1626">
+<link rel="manifest" href="manifest-driver.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Driver Portal">
+<title>Driver Portal — Shree Maa Narmada Auto Mobile's & Travels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --ink: #141414;
+    --ink-dark: #0F2A5C;
+    --paper: #FBF9F4;
+    --paper-line: #E7E1D3;
+    --brass: #D4AF37;
+    --brass-deep: #A8791C;
+    --brass-light: #F0D687;
+    --action: #0E9F6E;
+    --action-deep: #076E4C;
+    --action-light: #6FD9B5;
+    --paid: #3F7859;
+    --paid-bg: #E4EFE8;
+    --due: #B23B31;
+    --due-bg: #F7E6E3;
+    --warn: #96650F;
+    --warn-bg: #FCEFD9;
+    --text: #2B2E33;
+    --muted: #6B7280;
+    --shadow-card: 0 1px 2px rgba(20,15,5,0.05), 0 14px 32px rgba(20,15,5,0.09);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body{ height:100%; margin:0; }
+  body{
+    background: var(--paper); color: var(--text);
+    font-family:-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom: 30px;
+  }
+  header{
+    position:relative;
+    background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.16), transparent 55%),
+      linear-gradient(165deg, #17203a 0%, #0d1626 60%, #050810 100%);
+    color:#fff; padding: 24px 20px 30px; text-align:center;
+    border-bottom: 3px solid var(--brass);
+  }
+  .lang-toggle-btn{
+    position:absolute; top:14px; right:14px;
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff;
+    font-size:0.72rem; font-weight:700; padding:6px 11px; border-radius:20px; cursor:pointer;
+    letter-spacing:0.3px;
+  }
+  .lang-toggle-btn:active{ transform:scale(0.94); }
+  header img{ height:56px; width:auto; margin-bottom:10px; }
+  header h1{
+    font-family:'Bitter',serif; font-weight:800; font-size:1.15rem; margin:0 0 4px;
+    color:#F1F3F8; letter-spacing:0.2px;
+  }
+  header p{ margin:0; font-size:0.72rem; color:#9FB8DD; letter-spacing:1px; text-transform:uppercase; }
+
+  .wrap{ max-width:440px; margin:0 auto; padding: 0 16px; }
+
+  #loginScreen{ padding-top: 34px; }
+  .login-card{
+    background:#fff; border:1px solid var(--paper-line); border-radius:20px;
+    padding:28px 22px; box-shadow: var(--shadow-card); text-align:center;
+  }
+  .login-icon{
+    width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
+    background: linear-gradient(155deg, var(--brass-light) 0%, var(--brass) 55%, var(--brass-deep) 100%);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    box-shadow: 0 8px 20px rgba(212,175,55,0.3);
+  }
+  .login-card h2{ font-family:'Bitter',serif; font-size:1.15rem; margin:0 0 6px; color:var(--ink-dark); }
+  .login-card p{ font-size:0.82rem; color:var(--muted); margin:0 0 20px; line-height:1.5; }
+  .phone-input-row{
+    display:flex; align-items:center; border:1.5px solid var(--paper-line); border-radius:12px;
+    overflow:hidden; margin-bottom:14px;
+  }
+  .phone-prefix{ padding:13px 10px 13px 14px; color:var(--muted); font-weight:600; background:#FAF8F2; border-right:1px solid var(--paper-line); }
+  #phoneInput{
+    flex:1; border:none; outline:none; padding:13px 12px; font-size:1rem;
+    font-family:'JetBrains Mono',monospace; letter-spacing:1px;
+  }
+  #loginBtn{
+    width:100%; background: linear-gradient(160deg, var(--action-light) 0%, var(--action) 45%, var(--action-deep) 100%);
+    color:#fff; border:none; padding:14px; border-radius:12px; font-weight:700; font-size:0.95rem;
+    cursor:pointer; box-shadow: 0 6px 18px rgba(14,159,110,0.28);
+  }
+  #loginBtn:active{ transform:scale(0.98); }
+  #loginError{ color:var(--due); font-size:0.82rem; margin-top:12px; min-height:18px; }
+  #loginLoading{ display:none; color:var(--muted); font-size:0.82rem; margin-top:12px; }
+
+  .contact-note{ text-align:center; font-size:0.74rem; color:var(--muted); margin-top:14px; line-height:1.5; }
+  .contact-note a{ color:var(--brass-deep); font-weight:600; text-decoration:none; }
+
+  #pickerScreen{ display:none; padding-top:24px; }
+  .picker-title{ font-family:'Bitter',serif; font-weight:700; font-size:1.05rem; margin: 4px 4px 14px; color:var(--ink-dark); }
+  .picker-card{
+    background:#fff; border:1px solid var(--paper-line); border-radius:16px; padding:16px;
+    display:flex; align-items:center; gap:12px; margin-bottom:12px; cursor:pointer;
+    box-shadow: var(--shadow-card);
+  }
+  .picker-card:active{ transform:scale(0.98); }
+  .picker-avatar{ width:44px; height:44px; border-radius:50%; flex-shrink:0; object-fit:cover; }
+  .picker-avatar-placeholder{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    background: linear-gradient(155deg, var(--brass-light), var(--brass));
+    display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700;
+  }
+  .picker-name{ font-weight:700; color:var(--ink-dark); font-size:0.95rem; }
+  .picker-meta{ font-size:0.76rem; color:var(--muted); margin-top:2px; }
+
+  #dashScreen{ display:none; padding-top:20px; }
+  .back-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+  .back-btn{
+    background:#fff; border:1px solid var(--paper-line); border-radius:10px; width:36px; height:36px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-dark);
+  }
+  .driver-head{
+    position:relative; padding:15px 16px 13px;
+    background: linear-gradient(155deg, #232019 0%, #16130d 55%, #0a0906 100%);
+    display:flex; align-items:center; gap:12px;
+    border-radius:18px 18px 0 0; overflow:hidden;
+  }
+  .driver-head::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:3px;
+    background: linear-gradient(90deg, var(--brass-deep), var(--brass), var(--brass-light));
+  }
+  .driver-photo{
+    width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;
+    border:2px solid var(--brass-light); box-shadow:0 4px 10px rgba(0,0,0,0.4);
+  }
+  .driver-photo-placeholder{
+    width:48px;height:48px;border-radius:50%;flex-shrink:0;
+    background: linear-gradient(155deg,#A9C2E8 0%,#2F5DA8 55%,#1B3A6B 100%);
+    display:flex;align-items:center;justify-content:center;color:#0d1626;
+    border:2px solid var(--brass-light); box-shadow:0 4px 10px rgba(0,0,0,0.4);
+  }
+  .driver-id-chip{
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; font-weight:700;
+    color:#0d1626; background: var(--brass-light); padding:1px 6px; border-radius:5px;
+    margin-right:6px; vertical-align:1px;
+  }
+  .driver-name{ font-family:'Bitter',serif; font-weight:700; font-size:1.03rem; color:#EFF3FA; line-height:1.3; }
+  .driver-sub{ font-size:0.72rem; color:#8FA5C9; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .driver-salary-pill{ margin-left:auto; flex-shrink:0; text-align:right; }
+  .driver-salary-amt{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.95rem; color:#F0D687; }
+  .driver-salary-label{ font-size:0.6rem; color:#8a7a55; letter-spacing:0.3px; text-transform:uppercase; margin-top:1px; }
+  .driver-info-rows{ background:#fff; border:1px solid var(--paper-line); border-top:none; padding:12px 16px 4px; }
+  .driver-info-row{
+    display:flex; align-items:flex-start; gap:8px;
+    font-size:0.82rem; color:var(--text); padding:6px 0;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .driver-info-row:last-child{ border-bottom:none; }
+  .driver-info-row .di-label{ color:var(--muted); min-width:64px; flex-shrink:0; font-size:0.72rem; padding-top:1px; }
+  .driver-info-row .di-value{ flex:1; font-weight:600; color:var(--ink-dark); }
+  .driver-card-body{
+    background:#fff; border:1px solid var(--paper-line); border-top:none; border-radius:0 0 18px 18px;
+    padding:18px; box-shadow: var(--shadow-card); margin-bottom:18px;
+  }
+
+  .contact-btn-row{ display:flex; gap:10px; margin: 4px 0 18px; }
+  .contact-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:13px 8px; border-radius:12px; border:1.5px solid var(--paper-line);
+    background:#fff; text-decoration:none; cursor:pointer; font-family:inherit;
+  }
+  .contact-btn:active{ transform:scale(0.96); }
+  .contact-btn.call{ color:var(--brass-deep); border-color:var(--brass-light); }
+  .contact-btn.whatsapp{ color:#1f8a4c; border-color:#bfe6cf; }
+  .contact-btn span{ font-size:0.74rem; font-weight:700; }
+
+  .due-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background: var(--paid-bg); border-radius:12px; padding:14px 16px; margin-bottom:16px;
+  }
+  .due-banner.owed{ background: var(--due-bg); }
+  .due-label{ font-size:0.72rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .due-amount{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.5rem; color:var(--paid); }
+  .due-banner.owed .due-amount{ color:var(--due); }
+  .section-label{ font-size:0.72rem; font-weight:700; letter-spacing:1.5px; color:var(--brass-deep); text-transform:uppercase; margin: 4px 0 12px; }
+
+  .salary-table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
+  .salary-table th{
+    font-size:0.64rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px;
+    text-align:left; padding:6px 4px; border-bottom:1.5px solid var(--paper-line);
+  }
+  .salary-table td{ padding:9px 4px; border-bottom:1px dashed var(--paper-line); font-size:0.78rem; vertical-align:middle; }
+  .salary-table tr:last-child td{ border-bottom:none; }
+  .st-status{
+    display:inline-block; font-size:0.64rem; font-weight:700; padding:3px 8px; border-radius:20px;
+  }
+  .st-status.paid{ background:var(--paid-bg); color:var(--paid); }
+  .st-status.due{ background:var(--due-bg); color:var(--due); }
+  .st-status.upcoming{ background:#F0EDE3; color:var(--muted); }
+  .st-amount{ font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .st-deduction{ display:block; font-size:0.6rem; color:var(--due); margin-top:1px; }
+  .st-date{ color:var(--muted); font-size:0.7rem; }
+  .md-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 0; border-bottom:1px dashed var(--paper-line); font-size:0.84rem;
+  }
+  .md-row:last-child{ border-bottom:none; }
+  .md-row.total{ font-weight:800; font-size:0.95rem; color:var(--ink-dark); border-top:1.5px solid var(--paper-line); margin-top:6px; padding-top:12px; }
+  .md-row .md-val{ font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .md-row .md-val.neg{ color:var(--due); }
+  .md-status-banner{
+    text-align:center; padding:10px; border-radius:10px; font-weight:700; font-size:0.85rem; margin-bottom:14px;
+  }
+  .md-status-banner.paid{ background:var(--paid-bg); color:var(--paid); }
+  .md-status-banner.due{ background:var(--due-bg); color:var(--due); }
+  .md-status-banner.upcoming{ background:#F0EDE3; color:var(--muted); }
+
+  .pq-row{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin: 4px 0 18px; }
+  .pq-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
+    background:#fff; border:1px solid var(--paper-line); border-radius:14px; padding:14px 6px;
+    cursor:pointer; box-shadow: var(--shadow-card); position:relative; font-family:inherit;
+  }
+  .pq-btn:active{ transform:scale(0.96); }
+  .pq-icon{
+    width:42px; height:42px; border-radius:50%;
+    background: linear-gradient(155deg, var(--brass-light) 0%, var(--brass) 55%, var(--brass-deep) 100%);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 4px 10px rgba(212,175,55,0.3);
+  }
+  .pq-label{ font-size:0.72rem; font-weight:700; color:var(--ink-dark); text-align:center; }
+  .pq-badge{
+    position:absolute; top:6px; right:10px; background:var(--due); color:#fff;
+    font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px; line-height:1.3;
+  }
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-card{
+    background:#fff; border-radius:16px; max-width:400px; width:100%;
+    padding:22px; max-height:82vh; overflow-y:auto;
+  }
+  .modal-card-title{
+    font-family:'Bitter',serif; font-weight:800; font-size:1.05rem; color:var(--ink-dark);
+    margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .modal-close-btn{
+    width:100%; margin-top:16px; background:var(--paper); border:1px solid var(--paper-line);
+    border-radius:10px; padding:11px; font-weight:600; cursor:pointer;
+  }
+  .empty-note{ font-size:0.8rem; color:var(--muted); text-align:center; padding:14px 0; }
+
+  .adv-card{
+    background:#fff; border:1px solid var(--paper-line); border-radius:12px; padding:12px 14px;
+    margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .adv-date{ font-size:0.72rem; color:var(--muted); }
+  .adv-amt{ font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .adv-outstanding{ font-size:0.68rem; color:var(--due); font-weight:700; margin-top:2px; }
+
+  .doc-view-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 0; border-bottom:1px dashed var(--paper-line); font-size:0.86rem;
+  }
+  .doc-view-row:last-child{ border-bottom:none; }
+  .doc-view-btn{
+    background:var(--paper); border:1px solid var(--paper-line); color:var(--brass-deep);
+    border-radius:8px; padding:6px 12px; font-size:0.76rem; font-weight:700; cursor:pointer;
+  }
+
+  .ei-photo-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .ei-photo-preview{ width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--brass-light); }
+  .ei-photo-placeholder{
+    width:56px; height:56px; border-radius:50%; flex-shrink:0;
+    background: linear-gradient(155deg, var(--brass-light), var(--brass), var(--brass-deep));
+    display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .ei-photo-upload-btn{
+    background:var(--paper); border:1px solid var(--paper-line); color:var(--brass-deep);
+    padding:9px 14px; border-radius:9px; font-size:0.8rem; font-weight:700; cursor:pointer;
+  }
+  .ei-field{ margin-bottom:12px; text-align:left; }
+  .ei-field label{ display:block; font-size:0.74rem; color:var(--muted); margin-bottom:4px; font-weight:600; }
+  .ei-field input, .ei-field select{
+    width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--paper-line);
+    border-radius:9px; font-size:0.88rem; font-family:inherit; background:#fff; color:var(--ink-dark);
+  }
+  .btn-save-info{
+    width:100%; margin-top:8px;
+    background: linear-gradient(160deg, var(--action-light) 0%, var(--action) 45%, var(--action-deep) 100%);
+    color:#fff; border:none; padding:13px; border-radius:11px; font-weight:700; font-size:0.92rem; cursor:pointer;
+  }
+  .btn-save-info:active{ transform:scale(0.98); }
+
+  footer{ text-align:center; font-size:0.7rem; color:var(--muted); margin-top:30px; padding: 0 20px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <button type="button" id="langToggleBtn" class="lang-toggle-btn">हिं / EN</button>
+  <img src="logo-header.png" alt="Logo" onerror="this.style.display='none'">
+  <h1>DAXON MOBILITY</h1>
+  <p data-i18n="header_subtitle">Driver Portal</p>
+</header>
+
+<div class="wrap">
+
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><circle cx="12" cy="12" r="2.1" fill="currentColor" stroke="none"/><line x1="12" y1="3.7" x2="12" y2="9.6"/><line x1="5.3" y1="16" x2="10.3" y2="13.2"/><line x1="18.7" y1="16" x2="13.7" y2="13.2"/></svg>
+      </div>
+      <h2 data-i18n="login_title">Check Your Salary Status</h2>
+      <p data-i18n="login_desc">Enter your registered mobile number — the one we have on file for the driver record.</p>
+      <div class="phone-input-row">
+        <span class="phone-prefix">+91</span>
+        <input type="tel" id="phoneInput" data-i18n-placeholder="phone_placeholder" placeholder="10 digit number" maxlength="10" inputmode="numeric">
+      </div>
+      <button type="button" id="loginBtn" data-i18n="login_btn">Check</button>
+      <div id="loginLoading" data-i18n="login_loading">Searching…</div>
+      <div id="loginError"></div>
+    </div>
+    <div class="contact-note">
+      <span data-i18n="login_contact_note">Number not matching? Contact the office:</span><br>
+      <a href="tel:7036407670">7036407670</a> · <a href="tel:7909407670">7909407670</a>
+    </div>
+  </div>
+
+  <div id="pickerScreen">
+    <div class="picker-title" data-i18n="picker_title">Which driver's status do you want to see?</div>
+    <div id="pickerList"></div>
+  </div>
+
+  <div id="dashScreen">
+    <div class="back-row">
+      <button type="button" class="back-btn" id="backBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div style="font-size:0.82rem;color:var(--muted);" data-i18n="go_back">Go back</div>
+    </div>
+
+    <div class="driver-head">
+      <img id="driverPhoto" class="driver-photo" style="display:none;">
+      <div id="driverPhotoPlaceholder" class="driver-photo-placeholder">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.3"/><path d="M5 20c0-3.4 3-6 7-6s7 2.6 7 6"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="driver-name"><span class="driver-id-chip" id="driverIdChip">#1</span><span id="driverName">—</span></div>
+        <div class="driver-sub" id="driverSub">—</div>
+      </div>
+      <div class="driver-salary-pill">
+        <div class="driver-salary-amt" id="driverSalaryAmt">₹0</div>
+        <div class="driver-salary-label" data-i18n="per_month">per month</div>
+      </div>
+    </div>
+
+    <div class="driver-info-rows" id="driverInfoRows"></div>
+
+    <div class="driver-card-body">
+      <div class="contact-btn-row">
+        <a href="tel:7036407670" class="contact-btn call">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span data-i18n="call">Call</span>
+        </a>
+        <a href="#" class="contact-btn whatsapp" id="whatsappBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.9L4 20l4.2-1.1a7.9 7.9 0 0 0 3.85 1h0a7.94 7.94 0 0 0 5.55-13.58zm-5.55 12.2h0a6.58 6.58 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.6 6.6 0 1 1 5.6 3.1zm3.6-4.94c-.2-.1-1.17-.58-1.35-.64s-.31-.1-.44.1-.5.64-.61.77-.23.15-.42.05a5.4 5.4 0 0 1-1.6-.98 5.9 5.9 0 0 1-1.1-1.36c-.11-.2 0-.3.1-.4s.2-.24.3-.36a1.3 1.3 0 0 0 .2-.34.37.37 0 0 0 0-.35c-.05-.1-.44-1.06-.6-1.45s-.32-.33-.44-.33h-.38a.72.72 0 0 0-.53.25 2.2 2.2 0 0 0-.68 1.63 3.8 3.8 0 0 0 .8 2.03 8.7 8.7 0 0 0 3.33 2.94c.47.2.83.32 1.12.41a2.7 2.7 0 0 0 1.24.08c.38-.06 1.17-.48 1.33-.94a1.65 1.65 0 0 0 .12-.94c-.05-.08-.18-.13-.38-.23z"/></svg>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+
+      <div class="due-banner" id="outstandingBanner">
+        <div>
+          <div class="due-label" data-i18n="advance_outstanding">Advance Outstanding</div>
+          <div class="due-amount" id="outstandingAmount">₹0</div>
+        </div>
+        <svg id="outstandingIcon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--paid);"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+
+      <div class="section-label" style="margin-top:20px;" data-i18n="quick_access">Quick Access</div>
+      <div class="pq-row">
+        <button type="button" class="pq-btn" id="openSalaryStatusBtn">
+          <span class="pq-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <span class="pq-label" data-i18n="salary_status_short">Salary Status</span>
+        </button>
+        <button type="button" class="pq-btn" id="openAdvancesBtn">
+          <span class="pq-badge" id="advancesBadge" style="display:none;"></span>
+          <span class="pq-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span class="pq-label" data-i18n="advances">Advances</span>
+        </button>
+        <button type="button" class="pq-btn" id="openDocsBtn">
+          <span class="pq-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+          <span class="pq-label" data-i18n="documents">Documents</span>
+        </button>
+        <button type="button" class="pq-btn" id="openAnnouncementsBtn">
+          <span class="pq-badge" id="announceBadge" style="display:none;"></span>
+          <span class="pq-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 0 1-5.8-1.6"/></svg></span>
+          <span class="pq-label" data-i18n="announcements">Announcements</span>
+        </button>
+        <button type="button" class="pq-btn" id="openEditInfoBtn">
+          <span class="pq-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+          <span class="pq-label" data-i18n="edit_my_info">Edit My Info</span>
+        </button>
+      </div>
+
+      <div class="contact-note"><span data-i18n="dash_contact_note">Having trouble with salary/advance? Contact the office:</span><br>
+        <a href="tel:7036407670">7036407670</a> · <a href="tel:7909407670">7909407670</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Salary Status modal -->
+  <div class="modal-overlay" id="salaryStatusOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span data-i18n="salary_status_section">Salary Status (Month-by-Month)</span>
+      </div>
+      <table class="salary-table">
+        <thead>
+          <tr><th data-i18n="th_month">Month</th><th data-i18n="th_status">Status</th><th></th></tr>
+        </thead>
+        <tbody id="salaryTableBody"></tbody>
+      </table>
+      <button type="button" class="modal-close-btn" data-close="salaryStatusOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="advancesOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        <span data-i18n="advances">Advances</span>
+      </div>
+      <div id="advancesList"></div>
+      <button type="button" class="modal-close-btn" data-close="advancesOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="docsOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span data-i18n="documents">Documents</span>
+      </div>
+      <div id="docsList"></div>
+      <button type="button" class="modal-close-btn" data-close="docsOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="announcementsOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 0 1-5.8-1.6"/></svg>
+        <span data-i18n="general_announcements">General Announcements</span>
+      </div>
+      <div id="driverAnnouncementsList"></div>
+      <button type="button" class="modal-close-btn" data-close="announcementsOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editInfoOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span data-i18n="edit_info_title">Edit My Information</span>
+      </div>
+      <p style="font-size:0.76rem;color:var(--muted);margin:-6px 0 14px;" data-i18n="edit_info_desc">Fill in your correct details here — this will update the office record directly.</p>
+
+      <form id="editInfoForm">
+        <div class="ei-photo-row">
+          <img id="eiPhotoPreview" class="ei-photo-preview" style="display:none;">
+          <div id="eiPhotoPlaceholder" class="ei-photo-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.3"/><path d="M5 20c0-3.4 3-6 7-6s7 2.6 7 6"/></svg>
+          </div>
+          <label class="ei-photo-upload-btn">
+            <span data-i18n="change_photo">Change Photo</span>
+            <input type="file" id="eiPhotoFile" accept="image/*" style="display:none;">
+          </label>
+        </div>
+        <input type="hidden" id="eiPhotoData">
+
+        <div class="ei-field"><label data-i18n="drivers_name">Driver's Name</label><input type="text" id="eiName" required></div>
+        <div class="ei-field"><label data-i18n="phone_label">Phone Number</label><input type="tel" id="eiPhone" inputmode="numeric"></div>
+        <div class="ei-field"><label data-i18n="address_label">Address</label><input type="text" id="eiAddress"></div>
+        <div class="ei-field"><label data-i18n="license_number_label">License Number</label><input type="text" id="eiLicenseNumber"></div>
+
+        <div style="height:1px; background:var(--paper-line); margin:16px 0;"></div>
+        <p style="font-size:0.76rem;color:var(--muted);margin:0 0 12px;font-weight:700;">🏦 <span data-i18n="bank_details_title">Bank Account Details</span></p>
+        <div class="ei-field"><label data-i18n="bank_name_label">Bank Name</label><input type="text" id="eiBankName"></div>
+        <div class="ei-field"><label data-i18n="account_holder_label">Account Holder Name (as per bank passbook)</label><input type="text" id="eiAccountHolderName"></div>
+        <div class="ei-field"><label data-i18n="account_number_label">Account Number</label><input type="text" id="eiAccountNumber" inputmode="numeric"></div>
+        <div class="ei-field"><label data-i18n="ifsc_label">IFSC Code</label><input type="text" id="eiIFSC" style="text-transform:uppercase;"></div>
+        <div class="ei-field"><label data-i18n="branch_name_label">Branch Name</label><input type="text" id="eiBranchName"></div>
+
+        <button type="submit" class="btn-save-info" id="eiSaveBtn" data-i18n="save_changes">Save Changes</button>
+      </form>
+      <div id="eiStatusMsg" style="text-align:center;font-size:0.8rem;margin-top:10px;min-height:18px;"></div>
+      <button type="button" class="modal-close-btn" data-close="editInfoOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+  <!-- Month Detail modal -->
+  <div class="modal-overlay" id="monthDetailOverlay">
+    <div class="modal-card">
+      <div class="modal-card-title">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass-deep);"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="monthDetailTitle">Month Detail</span>
+      </div>
+      <div id="monthDetailContent"></div>
+      <button type="button" class="btn-save-info" id="monthDetailDownloadBtn" style="margin-top:14px;">
+        ⬇ <span data-i18n="download_salary_slip">Download Salary Slip (PDF)</span>
+      </button>
+      <button type="button" class="modal-close-btn" data-close="monthDetailOverlay" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  DAXON MOBILITY<br>
+  Reg No: UDYAM-MP-32-0014395 · GSTIN: 23BORPR8040F1ZP<br>
+  📍 Barman, Barman College ke samne, Government Hospital Road, Pin 487330, M.P.
+</footer>
+
+<script>
+let LANG = localStorage.getItem('driverPortalLang') || 'en';
+
+const translations = {
+  en: {
+    header_subtitle: 'Driver Portal',
+    login_title: 'Check Your Salary Status',
+    login_desc: 'Enter your registered mobile number — the one we have on file for the driver record.',
+    phone_placeholder: '10 digit number',
+    login_btn: 'Check',
+    login_loading: 'Searching…',
+    login_contact_note: 'Number not matching? Contact the office:',
+    picker_title: "Which driver's status do you want to see?",
+    go_back: 'Go back',
+    per_month: 'per month',
+    call: 'Call',
+    advance_outstanding: 'Advance Outstanding',
+    salary_status_section: 'Salary Status (Month-by-Month)',
+    salary_status_short: 'Salary Status',
+    th_month: 'Month', th_status: 'Status',
+    quick_access: 'Quick Access',
+    advances: 'Advances', documents: 'Documents', announcements: 'Announcements', edit_my_info: 'Edit My Info',
+    dash_contact_note: 'Having trouble with salary/advance? Contact the office:',
+    general_announcements: 'General Announcements',
+    close: 'Close',
+    edit_info_title: 'Edit My Information',
+    edit_info_desc: 'Fill in your correct details here — this will update the office record directly.',
+    change_photo: 'Change Photo',
+    drivers_name: "Driver's Name", phone_label: 'Phone Number', address_label: 'Address',
+    license_number_label: 'License Number', bank_details_title: 'Bank Account Details',
+    bank_name_label: 'Bank Name', account_holder_label: 'Account Holder Name (as per bank passbook)',
+    account_number_label: 'Account Number', ifsc_label: 'IFSC Code', branch_name_label: 'Branch Name',
+    save_changes: 'Save Changes',
+    download_salary_slip: 'Download Salary Slip (PDF)',
+    view: 'View', replace: 'Replace', upload_pdf: 'Upload PDF',
+    status_paid: 'Paid', status_due: 'Due', status_upcoming: 'Not Yet Due',
+    no_driver_found: 'No driver found with this number. Please contact the office.',
+    no_advances: 'No advances have been taken yet.',
+    no_announcements: 'No new announcements right now.',
+    outstanding_suffix: 'remaining',
+    cleared: '✓ Cleared',
+    pdf_only_error: 'Please upload a PDF file only',
+    pdf_size_error: 'The PDF must be smaller than 4MB',
+    upload_save_error: 'Could not save the upload — please check your internet and try again',
+    photo_size_error: '⚠️ Photo must be smaller than 5MB',
+    photo_load_error: '⚠️ Could not load the photo, please try again',
+    name_required: '⚠️ Name is required',
+    saving: 'Saving…',
+    saved_success: '✓ Information updated successfully',
+    save_error: '⚠️ Could not save — please check your internet and try again',
+    invalid_phone: 'Please enter a valid 10-digit mobile number.',
+    whatsapp_msg: (name) => `Hello, I would like to talk about my salary/advance as ${name}.`,
+    advance_taken: 'Advance Taken',
+  },
+  hi: {
+    header_subtitle: 'ड्राइवर पोर्टल',
+    login_title: 'अपना सैलरी स्टेटस देखें',
+    login_desc: 'अपना पंजीकृत मोबाइल नंबर डालें — जो हमारे पास ड्राइवर के रिकॉर्ड में दर्ज है।',
+    phone_placeholder: '10 अंकों का नंबर',
+    login_btn: 'देखें',
+    login_loading: 'ढूंढ रहे हैं…',
+    login_contact_note: 'नंबर मैच नहीं हो रहा? ऑफिस से संपर्क करें:',
+    picker_title: 'किस ड्राइवर का स्टेटस देखना है?',
+    go_back: 'वापस जाएं',
+    per_month: 'प्रति माह',
+    call: 'कॉल करें',
+    advance_outstanding: 'बकाया एडवांस',
+    salary_status_section: 'सैलरी स्टेटस (महीने के हिसाब से)',
+    salary_status_short: 'सैलरी स्टेटस',
+    th_month: 'महीना', th_status: 'स्थिति',
+    quick_access: 'त्वरित सुविधाएं',
+    advances: 'एडवांस', documents: 'दस्तावेज़', announcements: 'सूचनाएं', edit_my_info: 'मेरी जानकारी बदलें',
+    dash_contact_note: 'सैलरी/एडवांस में कोई दिक्कत हो तो ऑफिस से संपर्क करें:',
+    general_announcements: 'सामान्य सूचनाएं',
+    close: 'बंद करें',
+    edit_info_title: 'मेरी जानकारी बदलें',
+    edit_info_desc: 'यहां अपनी सही जानकारी भरें — यह सीधे ऑफिस के रिकॉर्ड में अपडेट हो जाएगी।',
+    change_photo: 'फोटो बदलें',
+    drivers_name: 'ड्राइवर का नाम', phone_label: 'फोन नंबर', address_label: 'पता',
+    license_number_label: 'लाइसेंस नंबर', bank_details_title: 'बैंक खाते का विवरण',
+    bank_name_label: 'बैंक का नाम', account_holder_label: 'खाताधारक का नाम (बैंक पासबुक के अनुसार)',
+    account_number_label: 'खाता नंबर', ifsc_label: 'IFSC कोड', branch_name_label: 'शाखा का नाम',
+    save_changes: 'बदलाव सेव करें',
+    download_salary_slip: 'सैलरी स्लिप डाउनलोड करें (PDF)',
+    view: 'देखें', replace: 'बदलें', upload_pdf: 'PDF अपलोड करें',
+    status_paid: 'जमा', status_due: 'बकाया', status_upcoming: 'अभी देय नहीं',
+    no_driver_found: 'इस नंबर से कोई ड्राइवर नहीं मिला। कृपया ऑफिस से संपर्क करें।',
+    no_advances: 'अभी तक कोई एडवांस नहीं लिया गया है।',
+    no_announcements: 'अभी कोई नई सूचना नहीं है।',
+    outstanding_suffix: 'बाकी',
+    cleared: '✓ चुकता',
+    pdf_only_error: 'कृपया सिर्फ PDF फाइल अपलोड करें',
+    pdf_size_error: 'PDF 4MB से छोटी होनी चाहिए',
+    upload_save_error: 'अपलोड सेव नहीं हो पाया — इंटरनेट जांचकर दोबारा कोशिश करें',
+    photo_size_error: '⚠️ फोटो 5MB से छोटी होनी चाहिए',
+    photo_load_error: '⚠️ फोटो लोड नहीं हो पाई, दोबारा कोशिश करें',
+    name_required: '⚠️ नाम ज़रूरी है',
+    saving: 'सेव हो रहा है…',
+    saved_success: '✓ जानकारी अपडेट हो गई',
+    save_error: '⚠️ सेव नहीं हो पाया — इंटरनेट जांचकर दोबारा कोशिश करें',
+    invalid_phone: 'कृपया 10 अंकों का सही मोबाइल नंबर डालें।',
+    whatsapp_msg: (name) => `नमस्ते, मैं ${name} अपनी सैलरी/एडवांस के बारे में बात करना चाहता हूं।`,
+    advance_taken: 'लिया गया एडवांस',
+  }
+};
+
+function t(key){
+  const val = translations[LANG][key];
+  return val !== undefined ? val : translations.en[key];
+}
+
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if(typeof val === 'string') el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    el.placeholder = t(key);
+  });
+  document.documentElement.lang = LANG;
+}
+
+document.getElementById('langToggleBtn').addEventListener('click', ()=>{
+  LANG = (LANG === 'en') ? 'hi' : 'en';
+  localStorage.setItem('driverPortalLang', LANG);
+  applyStaticTranslations();
+  if(document.getElementById('dashScreen').style.display === 'block' && currentDriver){
+    showDashboard(currentDriver);
+  }
+  if(document.getElementById('pickerScreen').style.display === 'block' && matchedDrivers.length){
+    showPicker(matchedDrivers);
+  }
+});
+applyStaticTranslations();
+
+const FIREBASE_DB_URL = 'https://van-register-default-rtdb.asia-southeast1.firebasedatabase.app';
+const MONTHS = ["Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun"];
+const MONTH_KEYS = ["07","08","09","10","11","12","01","02","03","04","05","06"];
+
+let state = { vehicles: [], drivers: [], salary: {}, advances: [], announcements: [], attendance: {} };
+let currentYear = getAcademicYearStart();
+let matchedDrivers = [];
+let currentDriver = null;
+let fullRawDriverState = null;
+
+function getAcademicYearStart(date){
+  date = date || new Date();
+  const m = date.getMonth() + 1;
+  const y = date.getFullYear();
+  return (m <= 6) ? (y - 1) : y;
+}
+function yearForMonth(mk){ return (parseInt(mk,10) >= 7) ? currentYear : (currentYear + 1); }
+function cleanPhone(phone){
+  if(!phone) return '';
+  let digits = String(phone).replace(/[^0-9]/g, '');
+  if(digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+  return digits;
+}
+function salaryKey(driverId, mk){ return driverId + '-' + yearForMonth(mk) + '-' + mk; }
+function daysInMonth(mk){ return new Date(yearForMonth(mk), parseInt(mk,10), 0).getDate(); }
+function attendanceKey(driverId, mk, day){ return driverId + '-' + yearForMonth(mk) + '-' + mk + '-' + day; }
+function salaryWorkingDays(mk){ return Math.max(1, daysInMonth(mk) - 4); }
+function isSunday(mk, day){ return new Date(yearForMonth(mk), parseInt(mk,10) - 1, day).getDay() === 0; }
+function unpaidDaysForDriver(driverId, mk){
+  const total = daysInMonth(mk);
+  let absent = 0, leave = 0;
+  for(let day=1; day<=total; day++){
+    if(isSunday(mk, day)) continue;
+    const status = state.attendance[attendanceKey(driverId, mk, day)];
+    if(status === 'A') absent++;
+    else if(status === 'L') leave++;
+  }
+  return { absent, leave, total: absent + leave };
+}
+function attendanceDeductionFor(driver, mk){
+  const salary = Number(driver && driver.salary || 0);
+  const unpaid = unpaidDaysForDriver(driver.id, mk);
+  const perDayRate = salary / salaryWorkingDays(mk);
+  return Math.round(unpaid.total * perDayRate);
+}
+function salaryAfterAttendance(driver, mk){
+  const salary = Number(driver && driver.salary || 0);
+  return Math.max(0, salary - attendanceDeductionFor(driver, mk));
+}
+function generateSalarySlipPDF(driverId, mk){
+  const d = state.drivers.find(x=>x.id===driverId);
+  if(!d) return null;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 40;
+  let y = 50;
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+  doc.text("DAXON MOBILITY", margin, y);
+  y += 18;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text('Reg No: UDYAM-MP-32-0014395', margin, y); y += 12;
+  doc.text('GSTIN: 23BORPR8040F1ZP', margin, y); y += 12;
+
+  const monthIdx = MONTH_KEYS.indexOf(mk);
+  const monthLabel = MONTHS[monthIdx] + ' ' + yearForMonth(mk);
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+  doc.text('SALARY SLIP', pageWidth - margin, 50, { align: 'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text('Month: ' + monthLabel, pageWidth - margin, 68, { align: 'right' });
+  doc.text('Generated: ' + new Date().toISOString().slice(0,10), pageWidth - margin, 80, { align: 'right' });
+
+  y = Math.max(y, 90);
+  y += 14;
+  doc.setDrawColor(200); doc.line(margin, y, pageWidth - margin, y);
+  y += 20;
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Driver Details:', margin, y);
+  y += 14;
+  doc.setFont('helvetica', 'normal');
+  doc.text(d.name || '', margin, y); y += 12;
+  if(d.phone){ doc.text('Phone: ' + d.phone, margin, y); y += 12; }
+  doc.text('Vehicle: ' + vehicleName(d.vehicleId), margin, y); y += 12;
+
+  y += 14;
+  const total = daysInMonth(mk);
+  const unpaidCounts = unpaidDaysForDriver(d.id, mk);
+  const absent = unpaidCounts.absent, leave = unpaidCounts.leave;
+  const salary = Number(d.salary||0);
+  const workingDays = salaryWorkingDays(mk);
+  const perDayRate = salary / workingDays;
+  const attendanceDeduction = attendanceDeductionFor(d, mk);
+  const afterAttendance = salaryAfterAttendance(d, mk);
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Attendance Summary:', margin, y);
+  y += 6;
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 16;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text(`Days in Month: ${total}    Absent: ${absent}    Leave: ${leave}`, margin, y);
+  y += 14;
+  doc.text(`Salary Basis: ${workingDays} working days/month (Sundays not paid)    Per-Day Rate: ₹${perDayRate.toFixed(2)}`, margin, y);
+  y += 24;
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Salary Calculation:', margin, y);
+  y += 6;
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 16;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  const rowX2 = pageWidth - margin;
+  doc.text('Base Salary:', margin, y); doc.text('₹'+salary.toFixed(2), rowX2, y, { align:'right' }); y += 14;
+  doc.text(`Attendance Deduction (${absent} absent + ${leave} leave day(s)):`, margin, y); doc.text('₹'+attendanceDeduction.toFixed(2), rowX2, y, { align:'right' }); y += 14;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Salary After Attendance:', margin, y); doc.text('₹'+afterAttendance.toFixed(2), rowX2, y, { align:'right' });
+  y += 24;
+
+  const driverAdvances = advancesForDriverMonth(driverId, mk).sort((a,b)=> a.date < b.date ? -1 : 1);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Advance Taken This Month:', margin, y);
+  y += 6;
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 16;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  if(driverAdvances.length === 0){
+    doc.text('No advance taken this month.', margin, y);
+    y += 14;
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Date', margin, y);
+    doc.text('Amount', margin + 90, y);
+    doc.text('Repaid', margin + 170, y);
+    doc.text('Outstanding', margin + 250, y);
+    y += 6;
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 14;
+    doc.setFont('helvetica', 'normal');
+    driverAdvances.forEach(a=>{
+      const owed = advanceOutstanding(a);
+      doc.text(a.date || '', margin, y);
+      doc.text('₹'+Number(a.amount||0).toFixed(2), margin + 90, y);
+      doc.text('₹'+Number(a.repaidAmount||0).toFixed(2), margin + 170, y);
+      doc.text('₹'+owed.toFixed(2), margin + 250, y);
+      y += 14;
+    });
+  }
+  y += 10;
+
+  const rec = state.salary[salaryKey(driverId, mk)];
+  doc.setDrawColor(200); doc.line(margin, y, pageWidth - margin, y);
+  y += 20;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  const advanceAdjusted = (rec && rec.paid) ? Number(rec.advanceDeducted||0) : 0;
+  const netSalary = afterAttendance - advanceAdjusted;
+  doc.text('Salary After Attendance:', margin, y); doc.text('₹'+afterAttendance.toFixed(2), rowX2, y, { align:'right' }); y += 14;
+  doc.text('Advance Adjusted This Month:', margin, y); doc.text('₹'+advanceAdjusted.toFixed(2), rowX2, y, { align:'right' }); y += 14;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+  doc.text('Net Salary Payable:', margin, y); doc.text('₹'+netSalary.toFixed(2), rowX2, y, { align:'right' });
+  y += 20;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  if(rec && rec.paid){
+    doc.setTextColor(63, 120, 89);
+    doc.text('Status: PAID on ' + rec.date, margin, y);
+    doc.setTextColor(0,0,0);
+  } else {
+    doc.setTextColor(178, 59, 49);
+    doc.text('Status: PENDING', margin, y);
+    doc.setTextColor(0,0,0);
+  }
+
+  y += 40;
+  doc.setFont('helvetica', 'italic'); doc.setFontSize(9);
+  doc.text('This is a computer-generated salary slip.', margin, y);
+
+  return doc;
+}
+
+function downloadSalarySlip(driverId, mk){
+  const doc = generateSalarySlipPDF(driverId, mk);
+  if(!doc) return;
+  const monthIdx = MONTH_KEYS.indexOf(mk);
+  doc.save(`Salary_${MONTHS[monthIdx]}_${yearForMonth(mk)}.pdf`);
+}
+
+function monthKeyOfDate(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr);
+  if(isNaN(d)) return null;
+  return String(d.getMonth() + 1).padStart(2, '0');
+}
+function yearOfDate(dateStr){
+  const d = new Date(dateStr);
+  return isNaN(d) ? null : d.getFullYear();
+}
+function advancesForDriverMonth(driverId, mk){
+  const targetYear = yearForMonth(mk);
+  return state.advances.filter(a =>
+    a.driverId === driverId &&
+    monthKeyOfDate(a.date) === mk &&
+    yearOfDate(a.date) === targetYear
+  );
+}
+function advanceOutstanding(a){
+  return Math.max(0, Number(a.amount||0) - Number(a.repaidAmount||0));
+}
+function advanceOutstandingForMonth(driverId, mk){
+  return advancesForDriverMonth(driverId, mk).reduce((sum,a)=> sum + advanceOutstanding(a), 0);
+}
+function vehicleName(id){
+  const v = state.vehicles.find(v=>v.name===id || v.id===id);
+  return v ? v.name : '';
+}
+function formatDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function resizeImageFile(file, maxSize){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > h && w > maxSize){ h = Math.round(h * maxSize / w); w = maxSize; }
+        else if(h > maxSize){ w = Math.round(w * maxSize / h); h = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function loadData(){
+  try{
+    const res = await fetch(`${FIREBASE_DB_URL}/driverData.json`);
+    const raw = await res.json();
+    if(raw && raw.value){
+      const parsed = JSON.parse(raw.value);
+      fullRawDriverState = parsed;
+      state.vehicles = parsed.vehicles || [];
+      state.drivers = parsed.drivers || [];
+      state.salary = parsed.salary || {};
+      state.advances = parsed.advances || [];
+      state.attendance = parsed.attendance || {};
+    }
+  }catch(e){
+    console.error('Load failed', e);
+  }
+  try{
+    const res2 = await fetch(`${FIREBASE_DB_URL}/data.json`);
+    const raw2 = await res2.json();
+    if(raw2 && raw2.value){
+      const parsed2 = JSON.parse(raw2.value);
+      state.announcements = parsed2.announcements || [];
+    }
+  }catch(e){
+    console.error('Announcements load failed', e);
+  }
+}
+
+async function saveDriverEdit(updatedDriver){
+  if(!fullRawDriverState || !Array.isArray(fullRawDriverState.drivers)) return false;
+  const idx = fullRawDriverState.drivers.findIndex(d => d.id === updatedDriver.id);
+  if(idx === -1) return false;
+  fullRawDriverState.drivers[idx] = { ...fullRawDriverState.drivers[idx], ...updatedDriver };
+  try{
+    const res = await fetch(`${FIREBASE_DB_URL}/driverData.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: JSON.stringify(fullRawDriverState) })
+    });
+    if(!res.ok) throw new Error('Save failed');
+    state.drivers = fullRawDriverState.drivers;
+    return true;
+  }catch(e){
+    console.error('Save failed', e);
+    return false;
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const input = document.getElementById('phoneInput');
+  const errorEl = document.getElementById('loginError');
+  const loadingEl = document.getElementById('loginLoading');
+  errorEl.textContent = '';
+  const digits = input.value.replace(/[^0-9]/g,'');
+  if(digits.length !== 10){
+    errorEl.textContent = t('invalid_phone');
+    return;
+  }
+  loadingEl.style.display = 'block';
+  await loadData();
+  loadingEl.style.display = 'none';
+
+  matchedDrivers = state.drivers.filter(d => cleanPhone(d.phone) === digits);
+  if(matchedDrivers.length === 0){
+    errorEl.textContent = t('no_driver_found');
+    return;
+  }
+  if(matchedDrivers.length === 1){
+    showDashboard(matchedDrivers[0]);
+  } else {
+    showPicker(matchedDrivers);
+  }
+});
+
+document.getElementById('phoneInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+function showPicker(drivers){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('pickerScreen').style.display = 'block';
+  document.getElementById('pickerList').innerHTML = drivers.map((d,i)=>`
+    <div class="picker-card" data-idx="${i}">
+      ${d.photo
+        ? `<img src="${d.photo}" class="picker-avatar">`
+        : `<div class="picker-avatar-placeholder">${(d.name||'?').charAt(0).toUpperCase()}</div>`}
+      <div>
+        <div class="picker-name">${d.name}</div>
+        <div class="picker-meta">${vehicleName(d.vehicleId)}</div>
+      </div>
+    </div>
+  `).join('');
+  document.querySelectorAll('.picker-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      showDashboard(drivers[Number(card.dataset.idx)]);
+    });
+  });
+}
+
+function showDashboard(driver){
+  currentDriver = driver;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('pickerScreen').style.display = 'none';
+  document.getElementById('dashScreen').style.display = 'block';
+
+  if(driver.photo){
+    document.getElementById('driverPhoto').src = driver.photo;
+    document.getElementById('driverPhoto').style.display = 'block';
+    document.getElementById('driverPhotoPlaceholder').style.display = 'none';
+  } else {
+    document.getElementById('driverPhoto').style.display = 'none';
+    document.getElementById('driverPhotoPlaceholder').style.display = 'flex';
+  }
+  document.getElementById('driverName').textContent = driver.name;
+  document.getElementById('driverSub').textContent = vehicleName(driver.vehicleId);
+  const srNo = state.drivers.findIndex(d => d.id === driver.id) + 1;
+  document.getElementById('driverIdChip').textContent = '#' + (srNo || 1);
+  document.getElementById('driverSalaryAmt').textContent = '₹' + (driver.salary || 0);
+
+  document.getElementById('driverInfoRows').innerHTML = [
+    driver.phone ? `<div class="driver-info-row"><span class="di-label">Phone</span><span class="di-value">${driver.phone}</span></div>` : '',
+    driver.address ? `<div class="driver-info-row"><span class="di-label">Address</span><span class="di-value">${driver.address}</span></div>` : '',
+    driver.licenseNumber ? `<div class="driver-info-row"><span class="di-label">License</span><span class="di-value">${driver.licenseNumber}${driver.licenseExpiry ? ' (exp: '+driver.licenseExpiry+')' : ''}</span></div>` : '',
+    driver.bankName ? `<div class="driver-info-row"><span class="di-label">Bank</span><span class="di-value">${driver.bankName}${driver.accountNumber ? ' · ****'+String(driver.accountNumber).slice(-4) : ''}</span></div>` : '',
+    driver.accountHolderName ? `<div class="driver-info-row"><span class="di-label">A/C Name</span><span class="di-value">${driver.accountHolderName}</span></div>` : ''
+  ].filter(Boolean).join('');
+
+  const waMsg = encodeURIComponent(t('whatsapp_msg')(driver.name));
+  document.getElementById('whatsappBtn').href = `https://wa.me/917036407670?text=${waMsg}`;
+
+  const outstanding = state.advances
+    .filter(a => a.driverId === driver.id)
+    .reduce((sum,a) => sum + Math.max(0, Number(a.amount||0) - Number(a.repaidAmount||0)), 0);
+  const outstandingBanner = document.getElementById('outstandingBanner');
+  const outstandingIcon = document.getElementById('outstandingIcon');
+  document.getElementById('outstandingAmount').textContent = '₹' + outstanding;
+  if(outstanding > 0){
+    outstandingBanner.classList.add('owed');
+    outstandingIcon.style.color = 'var(--due)';
+    outstandingIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  } else {
+    outstandingBanner.classList.remove('owed');
+    outstandingIcon.style.color = 'var(--paid)';
+    outstandingIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+  }
+
+  const tbody = document.getElementById('salaryTableBody');
+  tbody.innerHTML = MONTH_KEYS.map((mk, i)=>{
+    const key = salaryKey(driver.id, mk);
+    const rec = state.salary[key];
+    const paid = !!(rec && rec.paid);
+    const now = new Date();
+    const feeYear = yearForMonth(mk);
+    const feeMonth = parseInt(mk, 10);
+    const isPast = (now.getFullYear() > feeYear) || (now.getFullYear() === feeYear && now.getMonth()+1 > feeMonth);
+    const status = paid ? 'paid' : (isPast ? 'due' : 'upcoming');
+    const statusLabel = paid ? t('status_paid') : (isPast ? t('status_due') : t('status_upcoming'));
+    return `
+    <tr class="month-row" onclick="openMonthDetail('${driver.id}','${mk}')" style="cursor:pointer;">
+      <td><b>${MONTHS[i]}</b> ${yearForMonth(mk)}</td>
+      <td><span class="st-status ${status}">${statusLabel}</span></td>
+      <td style="text-align:right;color:var(--muted);">›</td>
+    </tr>`;
+  }).join('');
+
+  renderAdvances(driver);
+
+  const announceCount = (state.announcements || []).length;
+  const announceBadge = document.getElementById('announceBadge');
+  if(announceCount > 0){ announceBadge.textContent = announceCount; announceBadge.style.display = 'block'; }
+  else { announceBadge.style.display = 'none'; }
+
+  renderDriverAnnouncements();
+  renderDocs(driver);
+}
+
+function renderAdvances(driver){
+  const list = state.advances.filter(a => a.driverId === driver.id).sort((a,b)=> (a.date < b.date ? 1 : -1));
+  const badge = document.getElementById('advancesBadge');
+  const outstandingCount = list.filter(a => Math.max(0, Number(a.amount||0) - Number(a.repaidAmount||0)) > 0).length;
+  if(outstandingCount > 0){ badge.textContent = outstandingCount; badge.style.display = 'block'; }
+  else { badge.style.display = 'none'; }
+
+  const listEl = document.getElementById('advancesList');
+  if(list.length === 0){
+    listEl.innerHTML = `<div class="empty-note">${t('no_advances')}</div>`;
+    return;
+  }
+  listEl.innerHTML = list.map(a=>{
+    const outstanding = Math.max(0, Number(a.amount||0) - Number(a.repaidAmount||0));
+    return `
+    <div class="adv-card">
+      <div>
+        <div class="adv-amt">₹${a.amount||0}</div>
+        <div class="adv-date">${formatDate(a.date)}</div>
+      </div>
+      <div style="text-align:right;">
+        ${outstanding > 0 ? `<div class="adv-outstanding">₹${outstanding} ${t('outstanding_suffix')}</div>` : `<div style="color:var(--paid);font-size:0.72rem;font-weight:700;">${t('cleared')}</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let monthDetailContext = { driverId: null, monthKey: null };
+function openMonthDetail(driverId, mk){
+  const d = state.drivers.find(x=>x.id===driverId);
+  if(!d) return;
+  monthDetailContext = { driverId, monthKey: mk };
+  const monthIdx = MONTH_KEYS.indexOf(mk);
+  document.getElementById('monthDetailTitle').textContent = MONTHS[monthIdx] + ' ' + yearForMonth(mk);
+
+  const rec = state.salary[salaryKey(driverId, mk)];
+  const paid = !!(rec && rec.paid);
+  const now = new Date();
+  const feeYear = yearForMonth(mk);
+  const feeMonth = parseInt(mk, 10);
+  const isPast = (now.getFullYear() > feeYear) || (now.getFullYear() === feeYear && now.getMonth()+1 > feeMonth);
+  const status = paid ? 'paid' : (isPast ? 'due' : 'upcoming');
+  const statusLabel = paid ? '✓ ' + t('status_paid') : (isPast ? '⏳ ' + t('status_due') : t('status_upcoming'));
+
+  const salary = Number(d.salary||0);
+  const unpaidCounts = unpaidDaysForDriver(d.id, mk);
+  const workingDays = salaryWorkingDays(mk);
+  const perDayRate = salary / workingDays;
+  const attendanceDeduction = attendanceDeductionFor(d, mk);
+  const afterAttendance = salaryAfterAttendance(d, mk);
+  const outstandingThisMonth = advanceOutstandingForMonth(driverId, mk);
+  const advanceAdjusted = paid ? Number(rec.advanceDeducted||0) : Math.min(afterAttendance, outstandingThisMonth);
+  const netSalary = afterAttendance - advanceAdjusted;
+  const driverAdvances = advancesForDriverMonth(driverId, mk);
+
+  let html = `<div class="md-status-banner ${status}">${statusLabel}${rec && rec.date ? ' — ' + formatDate(rec.date) : ''}</div>`;
+  html += `<div class="md-row"><span>Base Salary</span><span class="md-val">₹${salary}</span></div>`;
+  html += `<div class="md-row"><span>Working Days (Sundays not paid)</span><span class="md-val">${workingDays} days</span></div>`;
+  html += `<div class="md-row"><span>Per-Day Rate</span><span class="md-val">₹${perDayRate.toFixed(2)}</span></div>`;
+  html += `<div class="md-row"><span>Absent Days</span><span class="md-val">${unpaidCounts.absent}</span></div>`;
+  html += `<div class="md-row"><span>Leave Days</span><span class="md-val">${unpaidCounts.leave}</span></div>`;
+  if(attendanceDeduction > 0){
+    html += `<div class="md-row"><span>Attendance Deduction</span><span class="md-val neg">-₹${attendanceDeduction}</span></div>`;
+  }
+  html += `<div class="md-row"><span>Salary After Attendance</span><span class="md-val">₹${afterAttendance}</span></div>`;
+  if(driverAdvances.length > 0){
+    driverAdvances.forEach(a=>{
+      const owed = advanceOutstanding(a);
+      html += `<div class="md-row"><span>${t('advance_taken')} (${formatDate(a.date)})</span><span class="md-val">₹${a.amount||0}${owed > 0 && owed < Number(a.amount||0) ? ' <span style="color:var(--muted);font-weight:600;">(₹'+owed+' '+t('outstanding_suffix')+')</span>' : ''}</span></div>`;
+    });
+  }
+  if(paid && advanceAdjusted > 0){
+    html += `<div class="md-row"><span>Advance Adjusted (is mahine)</span><span class="md-val neg">-₹${advanceAdjusted}</span></div>`;
+  } else if(!paid && outstandingThisMonth > 0){
+    html += `<div class="md-row" style="background:var(--warn-bg);margin:0 -6px;padding:9px 6px;border-radius:8px;"><span style="color:var(--warn);font-weight:700;">⏳ Pending Deduction (jab salary Paid mark hogi)</span><span class="md-val neg">-₹${advanceAdjusted}</span></div>`;
+  }
+  html += `<div class="md-row total"><span>Net Salary${!paid ? ' (Expected)' : ''}</span><span class="md-val">₹${netSalary}</span></div>`;
+
+  document.getElementById('monthDetailContent').innerHTML = html;
+  document.getElementById('monthDetailOverlay').style.display = 'flex';
+}
+
+document.getElementById('monthDetailDownloadBtn').addEventListener('click', ()=>{
+  if(monthDetailContext.driverId){
+    downloadSalarySlip(monthDetailContext.driverId, monthDetailContext.monthKey);
+  }
+});
+
+const DOC_TYPES = [
+  {key:'license', label:'Driving License'},
+  {key:'aadhaar', label:'Aadhaar Card'},
+  {key:'pan', label:'PAN Card'},
+  {key:'agreement', label:'Agreement'},
+  {key:'police', label:'Police Verification'}
+];
+
+function renderDocs(driver){
+  document.getElementById('docsList').innerHTML = DOC_TYPES.map(dt=>{
+    const doc = (driver.documents||{})[dt.key];
+    return `<div class="doc-view-row" style="flex-wrap:wrap;">
+      <span style="flex-shrink:0;">${dt.label}</span>
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${doc ? `<button type="button" class="doc-view-btn" onclick="viewDoc('${dt.key}')">${t('view')}</button>` : ''}
+        <label class="doc-view-btn" style="cursor:pointer;">
+          ${doc ? t('replace') : t('upload_pdf')}
+          <input type="file" accept="application/pdf" style="display:none;" onchange="uploadDoc('${dt.key}', this)">
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function uploadDoc(docKey, inputEl){
+  const file = inputEl.files[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf'){ alert(t('pdf_only_error')); inputEl.value=''; return; }
+  if(file.size > 4*1024*1024){ alert(t('pdf_size_error')); inputEl.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    const dataUrl = e.target.result;
+    const updatedDocs = { ...(currentDriver.documents||{}), [docKey]: { data: dataUrl, name: file.name } };
+    const ok = await saveDriverEdit({ id: currentDriver.id, documents: updatedDocs });
+    if(ok){
+      currentDriver = { ...currentDriver, documents: updatedDocs };
+      renderDocs(currentDriver);
+    } else {
+      alert(t('upload_save_error'));
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function viewDoc(docKey){
+  const doc = currentDriver && currentDriver.documents && currentDriver.documents[docKey];
+  if(!doc || !doc.data){ return; }
+  const w = window.open();
+  if(!w) return;
+  if(doc.data.indexOf('data:application/pdf') === 0){
+    w.document.write(`<iframe src="${doc.data}" style="position:fixed;inset:0;width:100%;height:100%;border:none;"></iframe>`);
+  } else {
+    w.document.write(`<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="${doc.data}" style="max-width:100%;max-height:100vh;"></body>`);
+  }
+}
+
+function renderDriverAnnouncements(){
+  const list = (state.announcements || []).slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+  const el = document.getElementById('driverAnnouncementsList');
+  if(list.length === 0){
+    el.innerHTML = `<div class="empty-note">${t('no_announcements')}</div>`;
+    return;
+  }
+  el.innerHTML = list.map(a => `
+    <div class="doc-view-row" style="display:block;">
+      <div style="font-size:0.82rem;color:var(--text);line-height:1.6;white-space:pre-wrap;">${a.text}</div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:5px;">${new Date(a.date).toLocaleDateString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('openSalaryStatusBtn').addEventListener('click', ()=>{
+  document.getElementById('salaryStatusOverlay').style.display = 'flex';
+});
+document.getElementById('openAdvancesBtn').addEventListener('click', ()=>{
+  document.getElementById('advancesOverlay').style.display = 'flex';
+});
+document.getElementById('openDocsBtn').addEventListener('click', ()=>{
+  document.getElementById('docsOverlay').style.display = 'flex';
+});
+document.getElementById('openAnnouncementsBtn').addEventListener('click', ()=>{
+  document.getElementById('announcementsOverlay').style.display = 'flex';
+  document.getElementById('announceBadge').style.display = 'none';
+});
+
+document.getElementById('openEditInfoBtn').addEventListener('click', ()=>{
+  if(!currentDriver) return;
+  const d = currentDriver;
+  document.getElementById('eiName').value = d.name || '';
+  document.getElementById('eiPhone').value = d.phone || '';
+  document.getElementById('eiAddress').value = d.address || '';
+  document.getElementById('eiLicenseNumber').value = d.licenseNumber || '';
+  document.getElementById('eiBankName').value = d.bankName || '';
+  document.getElementById('eiAccountHolderName').value = d.accountHolderName || '';
+  document.getElementById('eiAccountNumber').value = d.accountNumber || '';
+  document.getElementById('eiIFSC').value = d.ifscCode || '';
+  document.getElementById('eiBranchName').value = d.branchName || '';
+  document.getElementById('eiPhotoData').value = d.photo || '';
+
+  if(d.photo){
+    document.getElementById('eiPhotoPreview').src = d.photo;
+    document.getElementById('eiPhotoPreview').style.display = 'block';
+    document.getElementById('eiPhotoPlaceholder').style.display = 'none';
+  } else {
+    document.getElementById('eiPhotoPreview').style.display = 'none';
+    document.getElementById('eiPhotoPlaceholder').style.display = 'flex';
+  }
+  document.getElementById('eiStatusMsg').textContent = '';
+  document.getElementById('editInfoOverlay').style.display = 'flex';
+});
+
+document.getElementById('eiPhotoFile').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ document.getElementById('eiStatusMsg').textContent = t('photo_size_error'); return; }
+  try{
+    const dataUrl = await resizeImageFile(file, 500);
+    document.getElementById('eiPhotoData').value = dataUrl;
+    document.getElementById('eiPhotoPreview').src = dataUrl;
+    document.getElementById('eiPhotoPreview').style.display = 'block';
+    document.getElementById('eiPhotoPlaceholder').style.display = 'none';
+  }catch(err){
+    console.error(err);
+    document.getElementById('eiStatusMsg').textContent = t('photo_load_error');
+  }
+});
+
+document.getElementById('editInfoForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('eiStatusMsg');
+  const saveBtn = document.getElementById('eiSaveBtn');
+  const name = document.getElementById('eiName').value.trim();
+  if(!name){ statusEl.textContent = t('name_required'); statusEl.style.color = 'var(--due)'; return; }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('saving');
+  statusEl.textContent = '';
+
+  const updated = {
+    ...currentDriver,
+    name,
+    phone: document.getElementById('eiPhone').value.trim(),
+    address: document.getElementById('eiAddress').value.trim(),
+    licenseNumber: document.getElementById('eiLicenseNumber').value.trim(),
+    bankName: document.getElementById('eiBankName').value.trim(),
+    accountHolderName: document.getElementById('eiAccountHolderName').value.trim(),
+    accountNumber: document.getElementById('eiAccountNumber').value.trim(),
+    ifscCode: document.getElementById('eiIFSC').value.trim().toUpperCase(),
+    branchName: document.getElementById('eiBranchName').value.trim(),
+    photo: document.getElementById('eiPhotoData').value
+  };
+
+  const ok = await saveDriverEdit(updated);
+  saveBtn.disabled = false;
+  saveBtn.textContent = t('save_changes');
+
+  if(ok){
+    currentDriver = updated;
+    showDashboard(updated);
+    statusEl.style.color = 'var(--paid)';
+    statusEl.textContent = t('saved_success');
+    setTimeout(()=>{ document.getElementById('editInfoOverlay').style.display = 'none'; }, 900);
+  } else {
+    statusEl.style.color = 'var(--due)';
+    statusEl.textContent = t('save_error');
+  }
+});
+
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.getElementById(btn.dataset.close).style.display = 'none';
+  });
+});
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  document.getElementById('dashScreen').style.display = 'none';
+  if(matchedDrivers.length > 1){
+    document.getElementById('pickerScreen').style.display = 'block';
+  } else {
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('phoneInput').value = '';
+  }
+});
+</script>
+</body>
+</html>
